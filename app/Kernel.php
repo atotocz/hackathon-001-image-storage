@@ -1,0 +1,40 @@
+<?php
+namespace Hackaton\ImageStorage;
+
+use Hackaton\ImageStorage\Container\IContainer;
+use Hackaton\ImageStorage\Resolvers\ICallableResolver;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class Kernel {
+  /** @var IContainer */
+  protected $container;
+
+  public function __construct() {
+    $parameters = require __DIR__ . '/config.php';
+    $parameters['appDir'] = __DIR__;
+    $this->container = new Container($parameters);
+  }
+
+  public function handle(Request $request) {
+    /** @var ICallableResolver $resolver */
+    $resolver = $this->container->getService('callableResolver');
+    $target = $resolver->resolve($request);
+
+    if (!$target) {
+      return Response::create('No target found', 400);
+    }
+
+    list($controller, $action, $params) = $target;
+    array_unshift($params, $request);
+
+    $controller = new $controller($this->container);
+    $response = call_user_func_array([$controller, $action], $params);
+
+    if (!$response instanceof Response) {
+      throw new ControllerMustReturnsResponseException(sprintf('Expected "%s" got "%s"!', Response::class, gettype($response)));
+    }
+
+    return $response;
+  }
+}

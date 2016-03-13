@@ -1,0 +1,32 @@
+{
+  "name": "vyvojarisobe/hackaton-001-image-storage",
+  "description": "Image Storage API podle atoto.cz ONLINE Hackathonu",
+  "keywords": [
+    "image",
+    "storage"
+  ],
+  "homepage": "https://github.com/VyvojariSobe/hackaton-001-image-storage",
+  "minimum-stability": "stable",
+  "license": [
+    "BSD-3-Clause",
+    "GPL-2.0",
+    "GPL-3.0"
+  ],
+  "authors": [
+    {
+      "name": "Martin Zeman (Zemistr)",
+      "homepage": "http://zemistr.eu"
+    }
+  ],
+  "require": {
+    "php": ">=5.6.0",
+    "symfony/http-foundation": "3.0.*",
+    "guzzlehttp/guzzle": "6.1.*",
+    "nette/utils": "2.3.*"
+  },
+  "autoload": {
+    "classmap": [
+      "app"
+    ]
+  }
+}
