@@ -40,7 +40,6 @@ class HttpMethodNotFoundException extends HttpException {
 }
 
 class ControllerNotFoundException extends HttpException {
-  protected $code = 405;
 }
 
 class ActionNotFoundException extends ControllerNotFoundException {

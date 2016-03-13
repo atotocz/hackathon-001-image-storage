@@ -22,7 +22,7 @@ class MvcResolver implements ICallableResolver {
 
     $path = trim($request->getPathInfo(), '/');
     $path_parts = explode('/', $path) + [null];
-    $controller_name = ucfirst(strtolower(array_shift($path_parts)));
+    $controller_name = ucfirst(strtolower(array_shift($path_parts))) ?: 'Default';
 
     $controller_class = "\\Hackaton\\ImageStorage\\Controllers\\{$controller_name}Controller";
 
