@@ -3,19 +3,22 @@ namespace Hackaton\ImageStorage\Controllers;
 
 use Hackaton\ImageStorage\Container\ContainerAwareTrait;
 use Hackaton\ImageStorage\FileNotFoundException;
+use Hackaton\ImageStorage\HttpException;
 use Hackaton\ImageStorage\Image\Manager;
 use Hackaton\ImageStorage\Image\Providers\SymfonyRequestProvider;
+use Nette\Utils\ImageException;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class ImageController {
   use ContainerAwareTrait;
 
   public function readAction(Request $request, $key = null, $profile = null) {
     if ($key === null) {
-      return JsonResponse::create(['error' => 'Expected file key!'], 500);
+      return new JsonResponse(['error' => 'Expected file key!'], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     try {
@@ -26,19 +29,21 @@ class ImageController {
       $response = new BinaryFileResponse($stored_file->getPath());
       $response->prepare($request);
       $response->headers->set('Content-Type', $stored_file->getMimeType());
+
+      return $response;
     }
     catch (FileNotFoundException $e) {
       if ($this->container->getParameter('useNoImage')) {
-        return RedirectResponse::create($this->container->getParameter('noImageUrl'));
+        return new RedirectResponse($this->container->getParameter('noImageUrl'));
       }
 
-      return JsonResponse::create(['error' => $e->getMessage()], 404);
+      $code = Response::HTTP_NOT_FOUND;
     }
     catch (\Exception $e) {
-      return JsonResponse::create(['error' => $e->getMessage()], 500);
+      $code = Response::HTTP_INTERNAL_SERVER_ERROR;
     }
 
-    return $response;
+    return new JsonResponse(['error' => $e->getMessage()], $code);
   }
 
   public function createAction(Request $request) {
@@ -52,23 +57,30 @@ class ImageController {
 
       $stored_file = $image_manager->storeFromProvider($provider);
 
-      return JsonResponse::create(
+      return new JsonResponse(
         [
           'key'      => $stored_file->getKey(),
           'filesize' => $stored_file->getFilesize(),
           'updated'  => $stored_file->getUpdatedTime()
-        ],
-        200
+        ]
       );
     }
-    catch (\Exception $e) {
-      return JsonResponse::create(['error' => $e->getMessage()], 500);
+    catch (ImageException $e) {
+      $code = Response::HTTP_UNSUPPORTED_MEDIA_TYPE;
     }
+    catch (HttpException $e) {
+      $code = $e->getCode();
+    }
+    catch (\Exception $e) {
+      $code = Response::HTTP_INTERNAL_SERVER_ERROR;
+    }
+
+    return new JsonResponse(['error' => $e->getMessage()], $code);
   }
 
   public function deleteAction(Request $request, $key = null, $profile = null) {
     if ($key === null) {
-      return JsonResponse::create(['error' => 'Expected file key!'], 500);
+      return new JsonResponse(['error' => 'Expected file key!'], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     try {
@@ -76,13 +88,15 @@ class ImageController {
       $image_manager = $this->container->getService('imageManager');
       $image_manager->deleteImageFile($key, $profile);
 
-      return JsonResponse::create(sprintf('File with key "%s" was removed.', $key));
+      return new JsonResponse(sprintf('File with key "%s" was removed.', $key));
     }
     catch (FileNotFoundException $e) {
-      return JsonResponse::create(['error' => $e->getMessage()], 404);
+      $code = Response::HTTP_NOT_FOUND;
     }
     catch (\Exception $e) {
-      return JsonResponse::create(['error' => $e->getMessage()], 500);
+      $code = Response::HTTP_INTERNAL_SERVER_ERROR;
     }
+
+    return new JsonResponse(['error' => $e->getMessage()], $code);
   }
 }

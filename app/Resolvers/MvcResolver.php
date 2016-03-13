@@ -1,6 +1,9 @@
 <?php
 namespace Hackaton\ImageStorage\Resolvers;
 
+use Hackaton\ImageStorage\ActionNotFoundException;
+use Hackaton\ImageStorage\ControllerNotFoundException;
+use Hackaton\ImageStorage\HttpMethodNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 
 class MvcResolver implements ICallableResolver {
@@ -14,7 +17,7 @@ class MvcResolver implements ICallableResolver {
     $method = $request->getMethod();
 
     if (!isset(self::$method_to_action[$method])) {
-      return;
+      throw new HttpMethodNotFoundException(sprintf('Method "%s" is not allowed.', $method));
     }
 
     $path = trim($request->getPathInfo(), '/');
@@ -24,13 +27,13 @@ class MvcResolver implements ICallableResolver {
     $controller_class = "\\Hackaton\\ImageStorage\\Controllers\\{$controller_name}Controller";
 
     if (!class_exists($controller_class)) {
-      return;
+      throw new ControllerNotFoundException(sprintf('Controller "%s" not found', $controller_name));
     }
 
     $action = self::$method_to_action[$method];
 
     if (!method_exists($controller_class, $action)) {
-      return;
+      throw new ActionNotFoundException(sprintf('Controller "%s" not found', $controller_name));
     }
 
     return [$controller_class, $action, $path_parts];

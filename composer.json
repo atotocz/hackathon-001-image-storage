@@ -1,11 +1,11 @@
 {
-  "name": "vyvojarisobe/hackaton-001-image-storage",
+  "name": "vyvojarisobe/hackathon-001-image-storage",
   "description": "Image Storage API podle atoto.cz ONLINE Hackathonu",
   "keywords": [
     "image",
     "storage"
   ],
-  "homepage": "https://github.com/VyvojariSobe/hackaton-001-image-storage",
+  "homepage": "https://github.com/VyvojariSobe/hackathon-001-image-storage",
   "minimum-stability": "stable",
   "license": [
     "BSD-3-Clause",

@@ -17,24 +17,30 @@ class Kernel {
   }
 
   public function handle(Request $request) {
-    /** @var ICallableResolver $resolver */
-    $resolver = $this->container->getService('callableResolver');
-    $target = $resolver->resolve($request);
+    try {
+      /** @var ICallableResolver $resolver */
+      $resolver = $this->container->getService('callableResolver');
+      $target = $resolver->resolve($request);
 
-    if (!$target) {
-      return Response::create('No target found', 400);
+      list($controller, $action, $params) = $target;
+      array_unshift($params, $request);
+
+      $controller = new $controller($this->container);
+      $response = call_user_func_array([$controller, $action], $params);
+
+      if (!$response instanceof Response) {
+        throw new ControllerMustReturnsResponseException(sprintf('Expected "%s" got "%s"!', Response::class, gettype($response)));
+      }
+
+      return $response;
+    }
+    catch (HttpException $e) {
+      $code = $e->getCode();
+    }
+    catch (\Exception $e) {
+      $code = 500;
     }
 
-    list($controller, $action, $params) = $target;
-    array_unshift($params, $request);
-
-    $controller = new $controller($this->container);
-    $response = call_user_func_array([$controller, $action], $params);
-
-    if (!$response instanceof Response) {
-      throw new ControllerMustReturnsResponseException(sprintf('Expected "%s" got "%s"!', Response::class, gettype($response)));
-    }
-
-    return $response;
+    return new Response($e->getMessage(), $code);
   }
 }

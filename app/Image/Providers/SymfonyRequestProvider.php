@@ -1,10 +1,12 @@
 <?php
 namespace Hackaton\ImageStorage\Image\Providers;
 
+use Hackaton\ImageStorage\BadContentTypeException;
 use Hackaton\ImageStorage\CantLoadContentException;
 use Hackaton\ImageStorage\Image\File;
 use Hackaton\ImageStorage\Loaders\ILoader;
 use Hackaton\ImageStorage\NoContentSourceFoundException;
+use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 
 class SymfonyRequestProvider implements IProvider {
@@ -23,24 +25,38 @@ class SymfonyRequestProvider implements IProvider {
   }
 
   public function createFile() {
-    if (($url = $this->request->request->get('url')) !== null) {
+    $content_type = $this->request->getContentType();
+
+    if ($content_type !== 'form' && $content_type !== 'json') {
+      throw new BadContentTypeException(sprintf('Bad Content-Type! Expected "form" or "json", got "%s".', $content_type));
+    }
+
+    $parameter_bag = $this->request->request;
+
+    if ($content_type === 'json') {
+      $content = $this->request->getContent();
+      $content_data = @json_decode($content, true) ?: [];
+      $parameter_bag = new ParameterBag($content_data);
+    }
+
+    if (($url = $parameter_bag->get('url')) !== null) {
       $content = $this->loader->load($url);
 
       if ($content === false) {
         throw new CantLoadContentException(sprintf('Can\'t load content from url "%s".', $url));
       }
 
-      return new File(md5($url), $content);
+      return new File(md5("url:$url"), $content);
     }
 
-    if (($content = $this->request->request->get('content')) !== null) {
+    if (($content = $parameter_bag->get('content')) !== null) {
       $content = base64_decode($content);
 
       if ($content === false) {
         throw new CantLoadContentException(sprintf('Can\'t decode base64.', $url));
       }
 
-      return new File(md5($content), $content);
+      return new File(md5("content:$content"), $content);
     }
 
     throw new NoContentSourceFoundException('No source found.');

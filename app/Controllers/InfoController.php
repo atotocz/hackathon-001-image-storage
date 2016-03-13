@@ -6,13 +6,14 @@ use Hackaton\ImageStorage\FileNotFoundException;
 use Hackaton\ImageStorage\Image\Manager;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class InfoController {
   use ContainerAwareTrait;
 
   public function readAction(Request $request, $key = null) {
     if ($key === null) {
-      return JsonResponse::create(['error' => 'Expected ID!'], 500);
+      return new JsonResponse(['error' => 'Expected ID!'], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
 
     try {
@@ -20,20 +21,19 @@ class InfoController {
       $image_manager = $this->container->getService('imageManager');
       $stored_file = $image_manager->loadImageFile($key, 'original');
 
-      return JsonResponse::create(
+      return new JsonResponse(
         [
           'id'       => $stored_file->getKey(),
           'filesize' => $stored_file->getFilesize(),
           'updated'  => $stored_file->getUpdatedTime()
-        ],
-        200
+        ]
       );
     }
     catch (FileNotFoundException $e) {
-      return JsonResponse::create(['error' => $e->getMessage()], 404);
+      return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_NOT_FOUND);
     }
     catch (\Exception $e) {
-      return JsonResponse::create(['error' => $e->getMessage()], 500);
+      return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
     }
   }
 }
