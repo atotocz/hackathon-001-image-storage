@@ -30,6 +30,11 @@ class Manager
     public function storeFromProvider(IProvider $provider)
     {
         $file = $provider->createFile();
+
+        if ($file->getMd5() == '894917caa2734906cff27783e881dc14') { // store md5 into config
+            // placeholder...
+        }
+
         $stored_file = $this->storage->save('original', $file);
 
         foreach ($this->profiles as $profile => $_) {
