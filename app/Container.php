@@ -33,7 +33,12 @@ class Container implements IContainer
     {
         $processor = new Processor();
         $storage = new Md5Split3PairsAsLevelsStorage($this->getParameter('storageDir'));
-        $service = new Manager($processor, $storage, $this->getParameter('profiles'));
+        $service = new Manager(
+            $processor,
+            $storage,
+            $this->getParameter('profiles'),
+            $this->getParameter('excludedImages')
+        );
 
         return $service;
     }
