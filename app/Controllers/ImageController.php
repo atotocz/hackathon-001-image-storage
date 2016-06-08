@@ -2,6 +2,7 @@
 namespace Hackaton\ImageStorage\Controllers;
 
 use Hackaton\ImageStorage\Container\ContainerAwareTrait;
+use Hackaton\ImageStorage\Exceptions\ExcludedImageException;
 use Hackaton\ImageStorage\Exceptions\FileNotFoundException;
 use Hackaton\ImageStorage\Exceptions\HttpException;
 use Hackaton\ImageStorage\Image\Manager;
@@ -69,6 +70,8 @@ class ImageController
             $code = Response::HTTP_UNSUPPORTED_MEDIA_TYPE;
         } catch (HttpException $e) {
             $code = $e->getCode();
+        } catch (ExcludedImageException $e) {
+            $code = Response::HTTP_UNPROCESSABLE_ENTITY;
         } catch (\Exception $e) {
             $code = Response::HTTP_INTERNAL_SERVER_ERROR;
         }
