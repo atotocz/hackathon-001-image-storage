@@ -57,7 +57,7 @@ class SymfonyRequestProvider implements IProvider
             $content = base64_decode($content);
 
             if ($content === false) {
-                throw new CantLoadContentException(sprintf('Can\'t decode base64.', $url));
+                throw new CantLoadContentException(sprintf('Can\'t decode base64.'));
             }
 
             return new File(md5("content:$content"), $content);

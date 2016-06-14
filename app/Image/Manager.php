@@ -1,6 +1,7 @@
 <?php
 namespace Hackaton\ImageStorage\Image;
 
+use Hackaton\ImageStorage\Exceptions\ExcludedImageException;
 use Hackaton\ImageStorage\Exceptions\FileCouldNotBeDeletedException;
 use Hackaton\ImageStorage\Exceptions\FileNotFoundException;
 use Hackaton\ImageStorage\Exceptions\ProfileNotFoundException;
@@ -11,25 +12,36 @@ use Nette\Utils\Image;
 
 class Manager
 {
-  /** @var Processor */
+    /** @var Processor */
     protected $processor;
 
-  /** @var array */
+    /** @var array */
     protected $profiles;
 
-  /** @var IStorage */
+    /** @var IStorage */
     protected $storage;
 
-    public function __construct(Processor $processor, IStorage $storage, array $profiles)
+    /** @var array */
+    protected $excludedImages;
+
+
+    public function __construct(Processor $processor, IStorage $storage, array $profiles, array $excludedImages)
     {
         $this->storage = $storage;
         $this->profiles = $profiles;
         $this->processor = $processor;
+        $this->excludedImages = $excludedImages;
     }
 
     public function storeFromProvider(IProvider $provider)
     {
+        /** @var File $file */
         $file = $provider->createFile();
+
+        if (in_array($file->getMd5(), $this->excludedImages)) {
+            throw new ExcludedImageException('Image is excluded from storing!');
+        }
+
         $stored_file = $this->storage->save('original', $file);
 
         foreach ($this->profiles as $profile => $_) {
