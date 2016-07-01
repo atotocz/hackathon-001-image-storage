@@ -8,5 +8,7 @@ class FilterCommand implements ICommand
     public function execute(Image $image, array $params = [])
     {
         $image->filter($params[0]);
+
+        return $image;
     }
 }

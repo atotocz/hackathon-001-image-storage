@@ -7,16 +7,16 @@ return [
     'noImageUrl' => 'https://atoto.cz/images/no-product.png',
     'profiles'   => [
         'detail'     => [
-            ['resize', 300, 300, Image::SHRINK_ONLY],
+            ['placeResize', 300, 300, Image::SHRINK_ONLY],
         ],
         'list'       => [
-            ['resize', 150, 150, Image::SHRINK_ONLY],
+            ['placeResize', 150, 150, Image::SHRINK_ONLY],
         ],
         'large'      => [
-            ['resize', 1000, 1000, Image::SHRINK_ONLY],
+            ['placeResize', 1000, 1000, Image::SHRINK_ONLY],
         ],
         'bw-640x360' => [
-            ['resize', 320, 180, Image::SHRINK_ONLY],
+            ['placeResize', 320, 320, Image::SHRINK_ONLY],
             ['filter', IMG_FILTER_GRAYSCALE],
         ],
     ],

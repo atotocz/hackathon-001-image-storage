@@ -32,7 +32,9 @@ class Processor
         foreach ($commands as $command_data) {
             $name = array_shift($command_data);
             $command = $this->createCommand($name);
-            $command->execute($image, $command_data);
+            $image = $command->execute($image, $command_data);
         }
+
+        return $image;
     }
 }
