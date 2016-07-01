@@ -10,7 +10,7 @@ return [
             ['placeResize', 300, 300, Image::SHRINK_ONLY],
         ],
         'list'       => [
-            ['placeResize', 150, 150, Image::SHRINK_ONLY],
+            ['placeResize', 175, 175, Image::SHRINK_ONLY],
         ],
         'large'      => [
             ['placeResize', 1000, 1000, Image::SHRINK_ONLY],
