@@ -58,6 +58,7 @@ class Manager
         }
 
         $image = Image::fromString($stored_file->getContent());
+        $this->processor->cropBackground($image);
         $image = $this->processor->applyCommands($image, $this->profiles[$profile]);
 
         return $this->storage->save($profile, new File($stored_file->getKey(), $image->toString()));
