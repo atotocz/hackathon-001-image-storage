@@ -63,6 +63,18 @@ class Manager
         return $this->storage->save($profile, new File($stored_file->getKey(), $image->toString()));
     }
 
+    public function renderProfileImage(StoredFile $stored_file, $profile)
+    {
+        if (!isset($this->profiles[$profile])) {
+            throw new ProfileNotFoundException(sprintf('Profile "%s" not found', $profile));
+        }
+
+        $image = Image::fromString($stored_file->getContent());
+        $this->processor->applyCommands($image, $this->profiles[$profile]);
+
+        return $this->storage->storeProfileImage($profile, new File($stored_file->getKey(), $image->toString()));
+    }
+
     public function loadImageFile($key, $profile = null)
     {
         $profile = $profile ?: 'original';
@@ -73,7 +85,7 @@ class Manager
 
         $stored_file = $this->storage->load($profile, $key);
 
-        if (!$stored_file && $profile != 'original') {
+        if (!$stored_file && $profile !== 'original') {
             $stored_file = $this->storage->load('original', $key);
 
             if ($stored_file) {

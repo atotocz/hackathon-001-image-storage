@@ -56,6 +56,15 @@ class Md5Split3PairsAsLevelsStorage implements IStorage
         return new StoredFile($file->getKey(), $path);
     }
 
+    public function storeProfileImage($profile, File $file)
+    {
+        $path = $this->generatePathById($profile, $file->getKey(), 'jpg');
+        $this->preparePath($path);
+        @file_put_contents($path, $file->getContent());
+
+        return new StoredFile($file->getKey(), $path);
+    }
+
     public function load($profile, $key)
     {
         $id = $this->generateIdFromKey($key);
