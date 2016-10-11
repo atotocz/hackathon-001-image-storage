@@ -19,5 +19,8 @@ return [
             ['resize', 320, 180, Image::SHRINK_ONLY],
             ['filter', IMG_FILTER_GRAYSCALE],
         ],
+        '400x220'      => [
+            ['placeResize', 400, 220, Image::SHRINK_ONLY],
+        ],
     ],
 ];
